@@ -15,4 +15,46 @@ class AnimalSerializer(serializers.Serializer):
         choices = Sexes.choices,
         default = Sexes.UNINFORMED,
     )
-    dog_to_human_years = serializers.SerializerMethodField(read_only = True)
+    age_in_human_years = serializers.SerializerMethodField(read_only = True)
+    group = GroupSerializer()
+    traits = TraitSerializer(many = True)
+    
+    def get_age_in_human_years(self, obj: Animal):
+        return obj.dog_to_human_years()
+    
+    def create(self, data: dict):
+        group_data = data.pop('group')
+        traits_data = data.pop('traits')
+
+        new_group, _ = Group.objects.get_or_create(**group_data)
+
+        new_animal = Animal.objects.create(**data, group = new_group)
+
+        for trait in traits_data:
+            new_trait, _ = Trait.objects.get_or_create(**trait)
+            new_animal.traits.add(new_trait)
+        new_animal.save()
+
+        return new_animal
+
+
+    def update(self, instance: Animal, data: dict):
+        errors = {}
+        constants = {
+            'sex': str,
+            'traits': Trait,
+            'group': Group,
+        }
+
+        for data in constants.keys():
+            if data in data:
+                msg = {f'{data}': f'You can not update {data} property.'}
+                errors.update(msg)
+
+        for key, value in data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+
+        return instance
+        
