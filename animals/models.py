@@ -15,19 +15,20 @@ class Animal(models.Model):
     age = models.IntegerField()
     weight = models.FloatField()
     sex = models.CharField(
-        max_length=15,
-        choices=Sexes.choices,
-        default=Sexes.UNINFORMED,
+        max_length = 15,
+        choices = Sexes.choices,
+        default = Sexes.UNINFORMED,
     )
     group = models.ForeignKey(
         'groups.Group', 
-        on_delete=models.CASCADE,
-        related_name='animals',
-        null=True
+        on_delete = models.CASCADE,
+        related_name = 'animals',
+        null = True
     )
     traits = models.ManyToManyField(
         'traits.Trait',
-        related_name='traits'
+        related_name = 'traits',
+        null = True
     )
 
     def dog_to_human_years(self) -> int:
